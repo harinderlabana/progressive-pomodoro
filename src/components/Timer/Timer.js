@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./Timer.css";
 
 function Timer() {
@@ -10,6 +10,10 @@ function Timer() {
   //State to track if the timer is running or paused
   const [isActive, setIsActive] = useState(false);
 
+  //Audio Refs
+  const tickSfx = useRef(null);
+  const alarmSfx = useRef(null);
+
   //Countdown Logic
   useEffect(() => {
     let interval = null;
@@ -17,13 +21,19 @@ function Timer() {
     //Only run the interval if the timer is active
     if (isActive) {
       interval = setInterval(() => {
+        //10 second warning audio trigger
+        if (minutes === 0 && seconds === 11) {
+          tickSfx.current.play();
+        }
+
         if (seconds === 0) {
           if (minutes !== 0) {
             //Decrement minute and reset seconds to 59
             setSeconds(59);
             setMinutes(minutes - 1);
           } else {
-            //Timer has finished
+            //Timer has finished, play alarm
+            alarmSfx.current.play();
             setIsActive(false);
           }
         } else {
@@ -42,6 +52,10 @@ function Timer() {
   //JSX for the UI
   return (
     <div className="timer-container">
+      {/* Audio Elements */}
+      <audio ref={tickSfx} src="/tick.mp3" />
+      <audio ref={alarmSfx} src="/alarm.mp3" />
+
       <div className="time-display">
         {/* Format numbers to have a leading zero if they are less than 10 */}
         {minutes < 10 ? `0${minutes}` : minutes}:
